@@ -13,17 +13,37 @@ def run_client():
         print("-" * 30)
         print(f"Attempting to connect to {SERVER_IP}:{SERVER_PORT}...")
         try:
-            print("Connected to the server.")
             # --- TODO: YOUR CODE GOES HERE --- #
-            # 1. Create a socket object.
-            # 2. Use a 'with' statement for automatic cleanup.
-            # 3. Connect to the server.
-            # 4. Send the REQUEST_MESSAGE, encoded to bytes.
-            # 5. Receive the response from the server (e.g., up to 4096 bytes).
-            # 6. Decode the response from bytes to a string.
-            # 7. (Recommended) If you used JSON, parse the string into a dictionary.
-            #    Example: data = json.loads(response_string)
-            # 8. Print the received data in a user-friendly format.
+            # 1. Create a socket object (IPv4, TCP)
+            # 2. Use 'with' statement for automatic cleanup
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                # 3. Connect to the server
+                s.connect((SERVER_IP, SERVER_PORT))
+                print("Connected to the server.")
+                
+                # 4. Send the REQUEST_MESSAGE, encoded to bytes
+                s.sendall(REQUEST_MESSAGE.encode('utf-8'))
+                print(f"Sent request: {REQUEST_MESSAGE}")
+                
+                # 5. Receive the response from the server (up to 4096 bytes)
+                response = s.recv(4096)
+                
+                if not response:
+                    print("No data received from server.")
+                    continue
+                
+                # 6. Decode the response from bytes to string
+                response_str = response.decode('utf-8')
+                
+                # 7. Parse JSON string into a dictionary (handle potential parsing errors)
+                try:
+                    data = json.loads(response_str)
+                    # 8. Print received data in user-friendly format
+                    print("Received system information:")
+                    for key, value in data.items():
+                        print(f"  - {key}: {value}")
+                except json.JSONDecodeError:
+                    print(f"Received non-JSON response: {response_str}")
             # --- END OF TODO --- #
 
         except ConnectionRefusedError:
